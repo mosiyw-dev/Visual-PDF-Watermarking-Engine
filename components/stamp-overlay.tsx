@@ -48,7 +48,9 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    try {
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
 
     startRef.current = {
       startX: e.clientX,
@@ -75,7 +77,7 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
       let newW = initialTransform.widthPercent;
       let newH = initialTransform.heightPercent;
 
-      const minSize = 2; // min 2%
+      const minSize = 3; // min 3%
 
       if (dragMode === "move") {
         newX = Math.max(0, Math.min(100 - newW, initialTransform.xPercent + deltaXPercent));
@@ -133,14 +135,14 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
   };
 
   const handles = [
-    { mode: "nw" as DragMode, cursor: "nwse-resize", className: "-top-2 -left-2" },
-    { mode: "ne" as DragMode, cursor: "nesw-resize", className: "-top-2 -right-2" },
-    { mode: "se" as DragMode, cursor: "nwse-resize", className: "-bottom-2 -right-2" },
-    { mode: "sw" as DragMode, cursor: "nesw-resize", className: "-bottom-2 -left-2" },
-    { mode: "n" as DragMode, cursor: "ns-resize", className: "-top-2 left-1/2 -translate-x-1/2" },
-    { mode: "s" as DragMode, cursor: "ns-resize", className: "-bottom-2 left-1/2 -translate-x-1/2" },
-    { mode: "w" as DragMode, cursor: "ew-resize", className: "top-1/2 -left-2 -translate-y-1/2" },
-    { mode: "e" as DragMode, cursor: "ew-resize", className: "top-1/2 -right-2 -translate-y-1/2" },
+    { mode: "nw" as DragMode, cursor: "nwse-resize", className: "-top-3 -left-3" },
+    { mode: "ne" as DragMode, cursor: "nesw-resize", className: "-top-3 -right-3" },
+    { mode: "se" as DragMode, cursor: "nwse-resize", className: "-bottom-3 -right-3" },
+    { mode: "sw" as DragMode, cursor: "nesw-resize", className: "-bottom-3 -left-3" },
+    { mode: "n" as DragMode, cursor: "ns-resize", className: "-top-3 left-1/2 -translate-x-1/2" },
+    { mode: "s" as DragMode, cursor: "ns-resize", className: "-bottom-3 left-1/2 -translate-x-1/2" },
+    { mode: "w" as DragMode, cursor: "ew-resize", className: "top-1/2 -left-3 -translate-y-1/2" },
+    { mode: "e" as DragMode, cursor: "ew-resize", className: "top-1/2 -right-3 -translate-y-1/2" },
   ];
 
   return (
@@ -172,17 +174,17 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
 
         {/* Center Move Indicator overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-500/10 pointer-events-none">
-          <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-900/80 text-zinc-100 border border-zinc-700/60 shadow">
+          <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-900/90 text-zinc-100 border border-zinc-700/60 shadow">
             {Math.round(transform.widthPercent)}% × {Math.round(transform.heightPercent)}%
           </span>
         </div>
 
-        {/* 8 Drag/Resize Handles */}
+        {/* 8 Drag/Resize Handles - Made touch-friendly on mobile (5x5 w-5 h-5 with touch target) */}
         {!disabled &&
           handles.map((h) => (
             <div
               key={h.mode}
-              className={`absolute w-3.5 h-3.5 bg-white border-2 border-indigo-600 rounded-sm shadow-md transition-transform hover:scale-125 z-20 ${h.className}`}
+              className={`absolute w-4 h-4 md:w-3.5 md:h-3.5 bg-white border-2 border-indigo-600 rounded-full md:rounded-sm shadow-lg transition-transform active:scale-150 md:hover:scale-125 z-20 ${h.className}`}
               style={{ cursor: h.cursor }}
               onPointerDown={(e) => handlePointerDown(h.mode, e)}
             />

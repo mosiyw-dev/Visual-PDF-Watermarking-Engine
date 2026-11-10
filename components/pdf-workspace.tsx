@@ -91,10 +91,7 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
         1.5 * zoom
       );
 
-      // Save dimensions of the displayed canvas
       if (canvasRef.current) {
-        const displayWidth = canvasRef.current.clientWidth || canvasRef.current.width / (1.5 * zoom);
-        const displayHeight = canvasRef.current.clientHeight || canvasRef.current.height / (1.5 * zoom);
         setRenderedDims({
           width: canvasRef.current.width,
           height: canvasRef.current.height,
@@ -116,20 +113,20 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
 
   const handleFitWidth = () => {
     if (!containerRef.current || !canvasRef.current || renderedDims.width === 0) return;
-    const availableWidth = containerRef.current.clientWidth - 80;
+    const availableWidth = containerRef.current.clientWidth - 32;
     const baseWidth = renderedDims.width / zoom;
-    const targetZoom = Math.max(0.4, Math.min(2.0, availableWidth / baseWidth));
+    const targetZoom = Math.max(0.3, Math.min(2.0, availableWidth / baseWidth));
     onZoomChange(Math.round(targetZoom * 100) / 100);
   };
 
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 h-full overflow-auto bg-zinc-950 flex flex-col items-center p-6 select-none"
+      className="relative flex-1 w-full h-full overflow-auto bg-zinc-950 flex flex-col items-center p-3 sm:p-6 select-none"
     >
       {/* Top Floating Page Navigation & Zoom Bar */}
       {pdfDoc && (
-        <div className="sticky top-2 z-40 mb-6 drop-shadow-2xl">
+        <div className="sticky top-2 z-30 mb-4 sm:mb-6 drop-shadow-2xl max-w-full px-2">
           <PageNavigation
             currentPage={currentPage}
             totalPages={pdfDoc.numPages}
@@ -142,16 +139,16 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
       )}
 
       {/* Main Canvas Workspace Container */}
-      <div className="flex-1 flex items-center justify-center w-full min-h-[500px]">
+      <div className="flex-1 flex items-center justify-center w-full min-h-[360px] sm:min-h-[500px]">
         {!pdfDoc ? (
           <div
             onClick={onUploadClick}
-            className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 hover:border-indigo-500/60 rounded-3xl cursor-pointer bg-zinc-900/30 hover:bg-zinc-900/60 transition group max-w-md text-center"
+            className="flex flex-col items-center justify-center p-6 sm:p-12 border-2 border-dashed border-zinc-800 hover:border-indigo-500/60 rounded-2xl sm:rounded-3xl cursor-pointer bg-zinc-900/30 hover:bg-zinc-900/60 transition group max-w-sm sm:max-w-md text-center m-4"
           >
-            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-500/20 transition">
-              <FileUp className="w-8 h-8" />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-500/20 transition">
+              <FileUp className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h3 className="text-lg font-semibold text-zinc-200 mb-1">
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-200 mb-1">
               Select or Drop a PDF File
             </h3>
             <p className="text-xs text-zinc-500 max-w-xs mb-4">
@@ -162,7 +159,7 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
             </span>
           </div>
         ) : (
-          <div className="relative shadow-2xl rounded-sm transition-all duration-150 ring-1 ring-zinc-800">
+          <div className="relative shadow-2xl rounded-sm transition-all duration-150 ring-1 ring-zinc-800 max-w-full">
             {/* Loading Indicator */}
             {isLoadingPage && (
               <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-30 rounded-sm">
