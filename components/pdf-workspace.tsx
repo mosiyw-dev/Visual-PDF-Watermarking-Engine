@@ -42,6 +42,11 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
     height: 0,
   });
 
+  // Pan / Drag-to-Scroll state
+  const isPanningRef = useRef(false);
+  const panStartRef = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+
   // Load PDF.js document when arrayBuffer changes
   useEffect(() => {
     let isCancelled = false;
@@ -150,10 +155,55 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
     onZoomChange(Math.round(targetZoom * 100) / 100);
   };
 
+  // Drag-to-pan handlers on workspace background
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Only trigger if clicking on workspace background or canvas (not on stamp overlay or interactive buttons)
+    if (e.button !== 0 && e.button !== 1) return; // Left or Middle click
+    const target = e.target as HTMLElement;
+    if (target.closest(".group.touch-none") || target.closest("button") || target.closest("input")) {
+      return;
+    }
+
+    if (!containerRef.current) return;
+    isPanningRef.current = true;
+    setIsPanning(true);
+    panStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: containerRef.current.scrollLeft,
+      scrollTop: containerRef.current.scrollTop,
+    };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPanningRef.current || !containerRef.current) return;
+    const deltaX = e.clientX - panStartRef.current.x;
+    const deltaY = e.clientY - panStartRef.current.y;
+    containerRef.current.scrollLeft = panStartRef.current.scrollLeft - deltaX;
+    containerRef.current.scrollTop = panStartRef.current.scrollTop - deltaY;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isPanningRef.current) {
+      isPanningRef.current = false;
+      setIsPanning(false);
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+  };
+
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 w-full h-full overflow-auto bg-zinc-950 flex flex-col items-center p-3 sm:p-6 select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      className={`relative flex-1 w-full h-full overflow-auto bg-zinc-950 flex flex-col items-center p-3 sm:p-6 select-none ${
+        isPanning ? "cursor-grabbing" : "cursor-grab"
+      }`}
     >
       {/* Top Floating Page Navigation & Zoom Bar */}
       {pdfDoc && (
