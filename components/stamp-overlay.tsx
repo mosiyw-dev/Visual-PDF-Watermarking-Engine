@@ -143,15 +143,18 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
     }
   };
 
-  const handles = [
-    { mode: "nw" as DragMode, cursor: "nwse-resize", className: "-top-3 -left-3" },
-    { mode: "ne" as DragMode, cursor: "nesw-resize", className: "-top-3 -right-3" },
-    { mode: "se" as DragMode, cursor: "nwse-resize", className: "-bottom-3 -right-3" },
-    { mode: "sw" as DragMode, cursor: "nesw-resize", className: "-bottom-3 -left-3" },
-    { mode: "n" as DragMode, cursor: "ns-resize", className: "-top-3 left-1/2 -translate-x-1/2" },
-    { mode: "s" as DragMode, cursor: "ns-resize", className: "-bottom-3 left-1/2 -translate-x-1/2" },
-    { mode: "w" as DragMode, cursor: "ew-resize", className: "top-1/2 -left-3 -translate-y-1/2" },
-    { mode: "e" as DragMode, cursor: "ew-resize", className: "top-1/2 -right-3 -translate-y-1/2" },
+  // Invisible edge/corner zones for direct dragging & resizing
+  const resizeEdges: { mode: DragMode; cursor: string; className: string }[] = [
+    // 4 Corner zones
+    { mode: "nw", cursor: "nwse-resize", className: "-top-2 -left-2 w-5 h-5" },
+    { mode: "ne", cursor: "nesw-resize", className: "-top-2 -right-2 w-5 h-5" },
+    { mode: "se", cursor: "nwse-resize", className: "-bottom-2 -right-2 w-5 h-5" },
+    { mode: "sw", cursor: "nesw-resize", className: "-bottom-2 -left-2 w-5 h-5" },
+    // 4 Border edge zones
+    { mode: "n", cursor: "ns-resize", className: "-top-2 left-3 right-3 h-4" },
+    { mode: "s", cursor: "ns-resize", className: "-bottom-2 left-3 right-3 h-4" },
+    { mode: "w", cursor: "ew-resize", className: "-left-2 top-3 bottom-3 w-4" },
+    { mode: "e", cursor: "ew-resize", className: "-right-2 top-3 bottom-3 w-4" },
   ];
 
   return (
@@ -171,8 +174,8 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      {/* Visual Bounding outline */}
-      <div className="w-full h-full border-2 border-indigo-500 rounded-sm shadow-xl transition-shadow group-hover:border-indigo-400 group-hover:shadow-indigo-500/20 relative">
+      {/* Clean dashed bounding border when active/hovered */}
+      <div className="w-full h-full border-2 border-dashed border-indigo-400/90 rounded-sm shadow-xl transition-colors group-hover:border-indigo-300 relative">
         {/* Render Stamp Image */}
         <img
           src={stamp.dataUrl}
@@ -182,20 +185,20 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
         />
 
         {/* Center Move Indicator overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-500/10 pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-500/5 pointer-events-none">
           <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-900/90 text-zinc-100 border border-zinc-700/60 shadow">
             {Math.round(transform.widthPercent)}% × {Math.round(transform.heightPercent)}%
           </span>
         </div>
 
-        {/* 8 Drag/Resize Handles - Made touch-friendly on mobile (5x5 w-5 h-5 with touch target) */}
+        {/* Invisible edge & corner grab zones for intuitive border-based resizing without visual handles */}
         {!disabled &&
-          handles.map((h) => (
+          resizeEdges.map((edge) => (
             <div
-              key={h.mode}
-              className={`absolute w-4 h-4 md:w-3.5 md:h-3.5 bg-white border-2 border-indigo-600 rounded-full md:rounded-sm shadow-lg transition-transform active:scale-150 md:hover:scale-125 z-20 ${h.className}`}
-              style={{ cursor: h.cursor }}
-              onPointerDown={(e) => handlePointerDown(h.mode, e)}
+              key={edge.mode}
+              className={`absolute z-20 ${edge.className}`}
+              style={{ cursor: edge.cursor }}
+              onPointerDown={(e) => handlePointerDown(edge.mode, e)}
             />
           ))}
       </div>

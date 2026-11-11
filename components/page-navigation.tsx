@@ -72,20 +72,34 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
       {/* Zoom Controls */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
         <button
-          onClick={() => onZoomChange(Math.max(0.4, Math.round((zoom - 0.15) * 100) / 100))}
-          className="p-1 sm:p-1.5 rounded-lg hover:bg-zinc-800 active:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition"
+          onClick={() => onZoomChange(Math.max(0.1, Math.round((zoom - (zoom > 2 ? 0.5 : 0.2)) * 100) / 100))}
+          className="p-1 sm:p-1.5 rounded-lg hover:bg-zinc-800 active:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition cursor-pointer"
           title="Zoom out"
         >
           <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
-        <span className="w-10 sm:w-12 text-center text-[11px] sm:text-xs font-mono font-medium text-zinc-300">
-          {Math.round(zoom * 100)}%
-        </span>
+        <div className="flex items-center">
+          <input
+            type="number"
+            min={10}
+            max={2000}
+            step={10}
+            value={Math.round(zoom * 100)}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (!isNaN(val) && val >= 10) {
+                onZoomChange(Math.round(val) / 100);
+              }
+            }}
+            className="w-12 sm:w-14 px-1 py-0.5 bg-zinc-800/80 border border-zinc-700 rounded text-center text-[11px] sm:text-xs font-mono font-medium text-zinc-200 focus:outline-none focus:border-indigo-500"
+          />
+          <span className="text-[10px] text-zinc-500 ml-0.5">%</span>
+        </div>
 
         <button
-          onClick={() => onZoomChange(Math.min(2.5, Math.round((zoom + 0.15) * 100) / 100))}
-          className="p-1 sm:p-1.5 rounded-lg hover:bg-zinc-800 active:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition"
+          onClick={() => onZoomChange(Math.round((zoom + (zoom >= 2 ? 0.5 : 0.2)) * 100) / 100)}
+          className="p-1 sm:p-1.5 rounded-lg hover:bg-zinc-800 active:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition cursor-pointer"
           title="Zoom in"
         >
           <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -94,7 +108,7 @@ export const PageNavigation: React.FC<PageNavigationProps> = ({
         {onFitWidth && (
           <button
             onClick={onFitWidth}
-            className="p-1 sm:p-1.5 rounded-lg hover:bg-zinc-800 active:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition ml-0.5 sm:ml-1"
+            className="p-1 sm:p-1.5 rounded-lg hover:bg-zinc-800 active:bg-zinc-700 text-zinc-400 hover:text-zinc-100 transition ml-0.5 sm:ml-1 cursor-pointer"
             title="Fit to width"
           >
             <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
