@@ -50,31 +50,17 @@ export function clampTransform(
   pageAspectRatio: number,
   stampAspectRatio: number
 ): StampTransform {
-  let width = Math.max(2, Math.min(100, transform.widthPercent));
-  let height = Math.max(2, Math.min(100, transform.heightPercent));
+  let width = Math.max(0.1, transform.widthPercent);
+  let height = Math.max(0.1, transform.heightPercent);
 
   if (transform.preserveAspectRatio && stampAspectRatio > 0) {
-    // stampAspect = stampWidth / stampHeight
-    // pageAspect = pageWidth / pageHeight
-    // widthPercent / heightPercent = stampAspect / pageAspect
-    // So heightPercent = widthPercent * (pageAspect / stampAspect)
     height = width * (pageAspectRatio / stampAspectRatio);
-    if (height > 100) {
-      height = 100;
-      width = height * (stampAspectRatio / pageAspectRatio);
-    }
   }
-
-  const maxX = 100 - width;
-  const maxY = 100 - height;
-
-  const x = Math.max(0, Math.min(maxX, transform.xPercent));
-  const y = Math.max(0, Math.min(maxY, transform.yPercent));
 
   return {
     ...transform,
-    xPercent: Math.round(x * 1000) / 1000,
-    yPercent: Math.round(y * 1000) / 1000,
+    xPercent: Math.round(transform.xPercent * 1000) / 1000,
+    yPercent: Math.round(transform.yPercent * 1000) / 1000,
     widthPercent: Math.round(width * 1000) / 1000,
     heightPercent: Math.round(height * 1000) / 1000,
   };

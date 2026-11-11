@@ -77,26 +77,28 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
       let newW = initialTransform.widthPercent;
       let newH = initialTransform.heightPercent;
 
-      const minSize = 3; // min 3%
+      const minSize = 0.2; // Allows resizing down to 0.2% without arbitrary limits
 
       if (dragMode === "move") {
-        newX = Math.max(0, Math.min(100 - newW, initialTransform.xPercent + deltaXPercent));
-        newY = Math.max(0, Math.min(100 - newH, initialTransform.yPercent + deltaYPercent));
+        newX = initialTransform.xPercent + deltaXPercent;
+        newY = initialTransform.yPercent + deltaYPercent;
       } else {
-        // Resizing handles
+        // Resizing handles - no arbitrary maximum size constraint
         if (dragMode.includes("e")) {
-          newW = Math.max(minSize, Math.min(100 - initialTransform.xPercent, initialTransform.widthPercent + deltaXPercent));
+          newW = Math.max(minSize, initialTransform.widthPercent + deltaXPercent);
         }
         if (dragMode.includes("s")) {
-          newH = Math.max(minSize, Math.min(100 - initialTransform.yPercent, initialTransform.heightPercent + deltaYPercent));
+          newH = Math.max(minSize, initialTransform.heightPercent + deltaYPercent);
         }
         if (dragMode.includes("w")) {
-          const adjustedDelta = Math.max(-initialTransform.xPercent, Math.min(initialTransform.widthPercent - minSize, deltaXPercent));
+          const maxDelta = initialTransform.widthPercent - minSize;
+          const adjustedDelta = Math.min(maxDelta, deltaXPercent);
           newX = initialTransform.xPercent + adjustedDelta;
           newW = initialTransform.widthPercent - adjustedDelta;
         }
         if (dragMode.includes("n")) {
-          const adjustedDelta = Math.max(-initialTransform.yPercent, Math.min(initialTransform.heightPercent - minSize, deltaYPercent));
+          const maxDelta = initialTransform.heightPercent - minSize;
+          const adjustedDelta = Math.min(maxDelta, deltaYPercent);
           newY = initialTransform.yPercent + adjustedDelta;
           newH = initialTransform.heightPercent - adjustedDelta;
         }
@@ -104,12 +106,19 @@ export const StampOverlay: React.FC<StampOverlayProps> = ({
         // Handle aspect ratio preservation if enabled
         if (transform.preserveAspectRatio && stamp.aspectRatio > 0) {
           const pageAspect = containerWidth / containerHeight;
-          const targetH = newW * (pageAspect / stamp.aspectRatio);
-          if (newY + targetH <= 100) {
-            newH = targetH;
-          } else {
-            newH = 100 - newY;
+          if (dragMode === "e" || dragMode === "w") {
+            newH = newW * (pageAspect / stamp.aspectRatio);
+          } else if (dragMode === "s" || dragMode === "n") {
             newW = newH * (stamp.aspectRatio / pageAspect);
+          } else {
+            // For diagonal corner resize
+            newH = newW * (pageAspect / stamp.aspectRatio);
+            if (dragMode.includes("n")) {
+              newY = initialTransform.yPercent + (initialTransform.heightPercent - newH);
+            }
+            if (dragMode.includes("w")) {
+              newX = initialTransform.xPercent + (initialTransform.widthPercent - newW);
+            }
           }
         }
       }

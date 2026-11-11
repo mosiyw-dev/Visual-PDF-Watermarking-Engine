@@ -84,15 +84,36 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           {/* Sliders: Size, Opacity, Rotation */}
           <div className="space-y-3">
             <div className="space-y-1">
-              <div className="flex justify-between text-[11px] text-zinc-400">
+              <div className="flex justify-between items-center text-[11px] text-zinc-400">
                 <span>Stamp Size (% width)</span>
-                <span className="font-mono text-zinc-200">
-                  {Math.round(transform.widthPercent)}%
-                </span>
+                <div className="flex items-center gap-1 font-mono text-zinc-200">
+                  <input
+                    type="number"
+                    min={0.1}
+                    max={500}
+                    step={0.5}
+                    value={Math.round(transform.widthPercent * 10) / 10}
+                    onChange={(e) => {
+                      const widthPercent = Math.max(0.1, parseFloat(e.target.value) || 0.1);
+                      let heightPercent = transform.heightPercent;
+                      if (transform.preserveAspectRatio && pageMetrics) {
+                        heightPercent = widthPercent * (pageMetrics.aspectRatio / 1.0);
+                      }
+                      onTransformChange({
+                        ...transform,
+                        widthPercent,
+                        heightPercent,
+                      });
+                    }}
+                    className="w-14 px-1.5 py-0.5 bg-zinc-950 border border-zinc-700 rounded text-right text-xs text-zinc-100 focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                  <span>%</span>
+                </div>
               </div>
               <Slider
-                min={5}
-                max={95}
+                min={0.5}
+                max={200}
+                step={0.5}
                 value={transform.widthPercent}
                 onChange={(widthPercent) => {
                   let heightPercent = transform.heightPercent;
@@ -102,7 +123,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                   onTransformChange({
                     ...transform,
                     widthPercent,
-                    heightPercent: Math.min(95, heightPercent),
+                    heightPercent,
                   });
                 }}
               />
