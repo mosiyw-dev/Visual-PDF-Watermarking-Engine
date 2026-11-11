@@ -138,12 +138,12 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
         </div>
       )}
 
-      {/* Main Canvas Workspace Container */}
-      <div className="flex-1 flex items-center justify-center w-full min-h-[360px] sm:min-h-[500px]">
+      {/* Main Canvas Workspace Container - scrollable in both directions when zoomed */}
+      <div className="flex-1 flex items-start justify-center w-full min-h-[360px] sm:min-h-[500px] overflow-visible py-4">
         {!pdfDoc ? (
           <div
             onClick={onUploadClick}
-            className="flex flex-col items-center justify-center p-6 sm:p-12 border-2 border-dashed border-zinc-800 hover:border-indigo-500/60 rounded-2xl sm:rounded-3xl cursor-pointer bg-zinc-900/30 hover:bg-zinc-900/60 transition group max-w-sm sm:max-w-md text-center m-4"
+            className="flex flex-col items-center justify-center p-6 sm:p-12 border-2 border-dashed border-zinc-800 hover:border-indigo-500/60 rounded-2xl sm:rounded-3xl cursor-pointer bg-zinc-900/30 hover:bg-zinc-900/60 transition group max-w-sm sm:max-w-md text-center m-auto"
           >
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-500/20 transition">
               <FileUp className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -159,7 +159,7 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
             </span>
           </div>
         ) : (
-          <div className="relative shadow-2xl rounded-sm transition-all duration-150 ring-1 ring-zinc-800 max-w-full">
+          <div className="relative shadow-2xl rounded-sm transition-all duration-150 ring-1 ring-zinc-800 shrink-0">
             {/* Loading Indicator */}
             {isLoadingPage && (
               <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-30 rounded-sm">
@@ -171,10 +171,6 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
             <canvas
               ref={canvasRef}
               className="block rounded-sm bg-white pointer-events-none"
-              style={{
-                maxWidth: "100%",
-                height: "auto",
-              }}
             />
 
             {/* Interactive Stamp Overlay (Draggable / Resizable) */}
