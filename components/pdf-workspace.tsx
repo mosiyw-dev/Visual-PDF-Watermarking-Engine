@@ -80,6 +80,37 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
     }
   }, [currentPage, zoom]);
 
+  // Handle Ctrl+Wheel (Smooth Zoom) and Shift+Wheel (Horizontal Scroll) like professional design tools
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // 1. Ctrl + Wheel or Pinch Trackpad -> Smooth Zoom
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15;
+        // Dynamically adjust step size for very high zoom levels
+        const factor = zoom >= 3 ? 0.3 : zoom >= 1.5 ? 0.2 : 0.1;
+        const adjustedDelta = e.deltaY < 0 ? factor : -factor;
+        const newZoom = Math.max(0.2, Math.round((zoom + adjustedDelta) * 100) / 100);
+        onZoomChange(newZoom);
+        return;
+      }
+
+      // 2. Shift + Wheel -> Horizontal Pan/Scroll
+      if (e.shiftKey) {
+        e.preventDefault();
+        container.scrollLeft += e.deltaY || e.deltaX;
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, [zoom, onZoomChange]);
+
   const renderPage = async (pageNumber: number) => {
     if (!pdfJsDocRef.current || !canvasRef.current) return;
     try {
